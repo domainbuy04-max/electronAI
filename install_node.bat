@@ -1,6 +1,10 @@
 @echo off
 SETLOCAL
 
+:: ==============================
+:: Node.js BITS installer (user-level)
+:: ==============================
+
 :: Node.js settings
 set "VERSION=20.11.0"
 set "ARCH=win-x64"
@@ -23,13 +27,14 @@ if exist "%NODEBIN%\node.exe" (
 :: Create target dir
 if not exist "%TARGETDIR%" mkdir "%TARGETDIR%"
 
-:: Download Node.js ZIP
-echo Downloading Node.js %VERSION%...
-powershell -Command "Invoke-WebRequest -Uri '%URL%' -OutFile '%TEMP%\%ZIPNAME%'"
+:: Download Node.js ZIP via BITS
+set "ZIPPATH=%TEMP%\%ZIPNAME%"
+echo Downloading Node.js %VERSION% (fast, BITS)...
+bitsadmin /transfer NodeDownloadJob /download /priority normal %URL% %ZIPPATH%
 
 :: Extract ZIP
-echo Extracting...
-powershell -Command "Expand-Archive -Path '%TEMP%\%ZIPNAME%' -DestinationPath '%TARGETDIR%' -Force"
+echo Extracting Node.js...
+powershell -Command "Expand-Archive -Path '%ZIPPATH%' -DestinationPath '%TARGETDIR%' -Force"
 
 :: Add to user PATH
 setx PATH "%PATH%;%NODEBIN%"
